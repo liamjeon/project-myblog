@@ -14,6 +14,7 @@ export async function getPost(req, res, next){
     if(!post){ //id와 일치하는 post가 없다면 return 404
         return res.status(404);
     }
+    // res.render("defail", post);
     return res.status(200).json(post);
 }
 
