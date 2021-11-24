@@ -2,11 +2,14 @@ import express from "express";
 import "express-async-errors";
 import { connectDB } from "./database/database.js";
 import postRouter from './router/post.js'
+import userRouter from './router/auth.js'
+
 
 const app = express();
 app.use(express.json());
 
  app.use("/posts", postRouter);
+ app.use("/auth", userRouter);
 
 app.use((req, res, next) => {
   res.sendStatus(404);

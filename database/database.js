@@ -17,5 +17,5 @@ export function useVirtualId(schema) {
   });
   //JSON으로 변환할 때 가상요소들도 포함될 수 있도록 함.
   schema.set("toJSON", { virtuals: true });
-  schema.set("toOject", { virtuals: true }); //console.log에도 출력할 때 보고싶어서 Obejct에도 포함되도록 함
+  // schema.set("toOject", { virtuals: true }); //console.log에도 출력할 때 보고싶어서 Obejct에도 포함되도록 함
 }
