@@ -11,4 +11,10 @@ router.get('/:postId', isAuth, commentController.getComment);
 //POST /comments/:postId
 router.post('/:postId', isAuth, commentController.createComment);
 
+//PUT /comments/:id
+router.put('/:id', isAuth, commentController.updateComment);
+
+//DELETE /comments/:id
+router.delete('/:id', isAuth, commentController.deleteComment);
+
 export default router;
