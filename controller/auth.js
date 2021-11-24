@@ -24,11 +24,23 @@ export async function signup(req, res) {
   res.status(201).json({ token, username, userId });
 }
 
-// export async function login(req, res) {
-//   const { username, password } = req.body;
-//   const user = userRepository.findByUsername(username);
-  
-// }
+export async function login(req, res) {
+  const { username, password } = req.body;
+  const user = await userRepository.findByUsername(username);
+  console.log(user);
+
+  //username으로 찾았을 때 결과가 없다면 401 리턴
+  if(!user){
+    return res.status(401).json({message: "아이디 또는 비밀번호를 확인하세요."});
+  }
+  //bcrypt로 만든 password가 일치하지 않는다면 리턴
+  const inValidPassword = await bcrypt.compare(password, user.password);
+  if(!inValidPassword){
+    return res.status(401).json({message: "아이디 또는 비밀번호를 확인하세요."});
+  }
+  const token = createJwtToken(user.id);
+  res.status(200).json({token, username});
+}
 
 function createJwtToken(id) {
   return jwt.sign({ id }, jwtSecretKey, { expiresIn: jwtExpiresInDays });
