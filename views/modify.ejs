@@ -19,26 +19,70 @@
     <title>Document</title>
 
     <script>
-      function createPost() {
-        const post = {
-          title: $("#title").val(),
-          content: $("#content").val(),
-        };
+      const search = location.search;
+      const params = new URLSearchParams(search);
+      const id = params.get("id"); //post 의 아이디
+      const user_login = localStorage.getItem("user_login");
 
+      $(document).ready(function () {
+        if (!localStorage.getItem("token")) {
+          alert("로그인이 필요합니다.");
+          location.href = "/login";
+        }
+        get_post();
+      });
+
+      function get_post() {
+        
+        $("#tbody-box").empty(); // 상품창의 리스트를 삭제한다.
         $.ajax({
-          type: "POST",
+          type: "GET",
           beforeSend: function (xhr) {
             xhr.setRequestHeader(
               "Authorization",
               localStorage.getItem("token")
             );
           },
-          url: `/posts`,
+          url: `/posts/${id}`,
+          data: {},
+          success: function (response) {
+            //카테고리에 해당하는 goods를 가지고 온다.
+            let post = response;
+              const _id = post["_id"];
+              const username = post["username"];
+              const title = post["title"];
+              const content = post["content"];
+              const createdAt = post["createdAt"];
+              // console.log(_id, username, title, content, createdAt);
+
+              $("#title").val(title);
+              $("#content").val(content);
+            }
+        });
+      }
+      
+      function modify_post() {
+        const post = {
+          title: $("#title").val(),
+          content: $("#content").val(),
+        };
+
+        $.ajax({
+          type: "PUT",
+          beforeSend: function (xhr) {
+            xhr.setRequestHeader(
+              "Authorization",
+              localStorage.getItem("token")
+            );
+          },
+          url: `/posts/${id}`,
           data: JSON.stringify(post),
           contentType: "application/json",
           success: function (response) {
-            alert('글 작성 완료!')
-            location.href = "/";
+            alert('글 수정 완료!')
+            // history.back();
+            // window.location.reload();
+             location.href = "/";
           },
         });
       }
@@ -48,8 +92,8 @@
     <div style="width:500px; margin:auto;">
       <p>제목 : <input type="text" id="title" /></p>
       <p>내용 : <input type="text" id="content" /></p>
-      <button id="btn-login" onclick="createPost()">작성하기</button>
-      <button id="btn-signup" onclick="location.href = `/`">취소</button>
+      <button id="btn-login" onclick="modify_post()">수정완료</button>
+      <button id="btn-signup" onclick="history.back()">취소</button>
     </div>
   </body>
 </html>

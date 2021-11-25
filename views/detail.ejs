@@ -23,6 +23,7 @@
       const params = new URLSearchParams(search);
       const id = params.get("id"); //post 의 아이디
       const user_login = localStorage.getItem("user_login");
+      let post_username;
 
       $(document).ready(function () {
         if (!localStorage.getItem("token")) {
@@ -51,8 +52,26 @@
             const content = post.content;
             console.log(username, title, content);
             make_post(username, title, content);
+
+            if (username !== user_login) {
+              document.getElementById("btn-modify").style = "display:none";
+            } else {
+              document.getElementById("btn-modify").style = "display:block";
+            }
           },
         });
+      }
+
+      //게시글 삽입
+      function make_post(username, title, content) {
+        let temp_html = `
+          <h2 id="data-username" style="display:none">${username}</h2>
+          <h4  style="text-align: right;">${user_login} 님 반갑습니다</h4>
+          <h2>제목</h2>
+          <h4>${title}</h4>
+          <h2>내용</h2>
+          <h4>${content}</h4>`;
+        $("#post-content").append(temp_html);
       }
 
       //댓글 정보 가져오기
@@ -80,39 +99,42 @@
         });
       }
 
+      function commment_toggle(id) {
+        if (document.getElementById(`d-${id}`).style.display == "none") {
+          document.getElementById(`d-${id}`).style = "display:block";
+          document.getElementById(`m-${id}`).style = "display:none";
+        } else {
+          document.getElementById(`d-${id}`).style = "display:none";
+          document.getElementById(`m-${id}`).style = "display:block";
+        }
+      }
+
       // 가져온 댓글들을 Table Rows로 삽입.
       function make_comments(num, username, text, createdAt, comment_id) {
         if (user_login === username) {
           let temp_html = `
-            <tr id="word-${num}">
-                <td>${username}</td>
-                <td>${text}</td>
-                <td>${createdAt}</td>
-                <td><button id=${comment_id}">삭제</button></td>
-            </tr>`;
+            <tr id="d-${comment_id}" style="display: block; text-align:center" >
+                <td width="100">${username}</td>
+                <td width="250" >${text}</td>
+                <td><button onclick="commment_toggle('${comment_id}')">수정</button><button id=${comment_id}">삭제</button></td>
+            </tr>
+            <tr id="m-${comment_id}" style="display: none">
+              <td width="100" text-align:center>${username}</td>
+              <td width="250"><input id="mc-${comment_id}" type="text" value="${text}"></td>
+              <td><button onclick="modify_comment('${comment_id}')">완료</button></td>
+            </tr>
+            `;
           $("#tbody-box").append(temp_html);
-          document.getElementById('comment_id').onclick = delete_comment(comment_id);
+          // document.getElementById('comment_id').onclick = delete_comment(comment_id);
         } else {
           let temp_html = `
-            <tr id="word-${num}">
-                <td>${username}</td>
-                <td>${text}</td>
-                <td>${createdAt}</td>
+            <tr style="display: block; text-align:center" >
+                <td width="100">${username}</td>
+                <td width="250">${text}</td>
+                <input type="text" value="${text}">
             </tr>`;
           $("#tbody-box").append(temp_html);
         }
-        
-      }
-
-      //게시글 삽입
-      function make_post(username, title, content) {
-        let temp_html = `
-          <h2>${user_login} 님 반갑습니다</h2>
-          <h2>제목</h2>
-          <h4>${title}</h4>
-          <h2>내용</h2>
-          <h4>${content}</h4>`;
-        $("#post-content").append(temp_html);
       }
 
       //댓글 작성
@@ -135,7 +157,7 @@
             location.href = `/detail?id=${id}`;
           },
           error: function () {
-            alert("아이디 또는 비밀번호를 확인하세요.");
+            alert("댓글을 입력하세요");
           },
         });
       }
@@ -159,24 +181,66 @@
           },
           error: function () {
             alert("error");
-          }
+          },
         });
       }
-  
+
+      //댓글 수정
+      function modify_comment(comment_id) {
+        const text = $(`#mc-${comment_id}`).val();
+        alert(text);
+        $.ajax({
+          type: "PUT",
+          beforeSend: function (xhr) {
+            xhr.setRequestHeader(
+              "Authorization",
+              localStorage.getItem("token")
+            );
+          },
+          url: `/comments/${comment_id}`,
+          data: JSON.stringify({ text }),
+          contentType: "application/json",
+          success: function (response) {
+            console.log(response);
+            window.location.reload();
+          },
+          error: function () {
+            alert("error");
+          },
+        });
+      }
+
+      //게시글 수정
+      function modify_post() {
+        if (post_username !== user_login) {
+          document.getElementById("btn-modify").style = "display:none";
+          // return alert("작성자가 아닙니다.");
+        } else {
+          document.getElementById("btn-modify").style = "display:none";
+        }
+        location.href = `/modify?id=${id}`;
+      }
     </script>
   </head>
   <body>
     <div style="width: 500px; margin: auto">
-      <div id="post-content">
+      <button id="btn-modify" onclick="modify_post()" style="display: none">
+        수정하기
+      </button>
+      <span>
+        <!-- <input type="text" value=""> -->
+        <button onclick="history.back();">뒤로가기</button>
+      </span>
+      <div id="post-content" style="text-align: center; margin-bottom: 50px">
         <!-- Insert Post-->
       </div>
-      <div id="postList" class="mb-3">
+      <div id="postList" class="mb-3" style="width: 100%">
         <table class="table">
           <thead class="thead-light">
-            <tr>
-              <th scope="col">작성자</th>
-              <th scope="col" style="width: 30%">댓글</th>
-              <th scope="col">작성 날짜</th>
+            <tr style="display: block">
+              <th scope="col" width="100">작성자</th>
+              <th scope="col" width="250">댓글</th>
+              <!-- <th scope="col">작성 날짜</th> -->
               <th scope="col"></th>
             </tr>
           </thead>
@@ -184,10 +248,11 @@
             <!-- Insert Table Rows-->
           </tbody>
         </table>
-        <input type="text" id="input_comment" />
-        <button onclick="insert_comment()">댓글 작성</button>
+        <div style="display: block; margin: auto">
+          <input type="text" id="input_comment" style="margin: auto; width:40%;"/>
+          <button onclick="insert_comment()">댓글 작성</button>
+        </div>
       </div>
-      <button onclick="location.href = '/'">뒤로가기</button>
     </div>
   </body>
 </html>

@@ -32,12 +32,15 @@ export async function updatePost(req, res, next){
     const { title, content } = req.body;
     const post = await postRepository.getById(id);
 
+    console.log(post.userId, req.userId);
+
     if(!post){ //id와 일치하는 post가 없다면 return 404
         return res.status(404);
     }
-    if(post.id !== req.userId){
+    if(post.userId !== req.userId){
         return res.sendStatus(403); //로그인했지만 권한 없음
     }
+    
     
     const updatedPost = await postRepository.update(id, title, content);
     res.status(200).json (updatedPost);
