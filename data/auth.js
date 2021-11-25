@@ -13,7 +13,7 @@ useVirtualId(userSchema); //가상의 id 추가
 const User = Mongoose.model("User", userSchema); //use collection과 schema 연결
 
 export async function findById(id) {
-  return User.findOne({ id });
+  return User.findById(id);
 }
 
 export async function findByUsername(username) {

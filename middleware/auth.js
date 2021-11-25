@@ -8,13 +8,13 @@ export const isAuth = async (req, res, next)=>{
     //header 안에 Authorization key 의 valuse를 가져옴
     const authHeader = req.get('Authorization');
     //authHeader가 없거나, Bearer로 시작하지 않으면 auth error 처리
-    // if(!(authHeader && authHeader.startsWith('Bearer'))){
-    //     return res.status(401).json(AUTH_ERROR);
-    // }
+    if(!(authHeader && authHeader.startsWith('Bearer'))){
+        return res.status(401).json(AUTH_ERROR);
+    }
 
     //Authorization header에서 token만 가져옴
-    // const token = authHeader.split(' ')[1]; //공백으로 분리
-    const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYxOWQ5YTNhMTJmY2UyMGUwMjc2YjIwNyIsImlhdCI6MTYzNzc1MzA1MywiZXhwIjoxNjM3OTI1ODUzfQ.HfBdOt2CqM_NRFzy2FwgS4ExTNg6qTLAP65xO2EPyKc'; //공백으로 분리
+    const token = authHeader.split(' ')[1]; //공백으로 분리
+    // const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYxOWQ5YTNhMTJmY2UyMGUwMjc2YjIwNyIsImlhdCI6MTYzNzc1MzA1MywiZXhwIjoxNjM3OTI1ODUzfQ.HfBdOt2CqM_NRFzy2FwgS4ExTNg6qTLAP65xO2EPyKc'; //공백으로 분리
 
     //token이 유효한지 검증
     jwt.verify(token, 'myblog-secret-key', async (error, decoded)=>{

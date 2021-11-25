@@ -4,7 +4,7 @@ import { connectDB } from "./database/database.js";
 import postRouter from "./router/post.js";
 import userRouter from "./router/auth.js";
 import commentRouter from "./router/comment.js";
-import mainRouter from './router/main.js';
+import mainRouter from './router/views.js';
 import path from 'path';
 
 const __dirname = path.resolve();

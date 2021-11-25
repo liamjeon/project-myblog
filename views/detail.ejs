@@ -1,152 +1,193 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-
-<head>
+  <head>
     <!-- Required meta tags -->
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <link rel="icon" href="/static/favicon.ico" type="image/x-icon">
-    <link rel="shortcut icon" href="/static/favicon.ico" type="image/x-icon">
-    <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css"
-          integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
-
-    <!-- Font Awesome CSS -->
-    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+    <link rel="icon" href="/static/favicon.ico" type="image/x-icon" />
+    <link rel="shortcut icon" href="/static/favicon.ico" type="image/x-icon" />
     <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
-    <script src="https://code.jquery.com/jquery-3.5.1.js"
-            integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc=" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"
-            integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN"
-            crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.min.js"
-            integrity="sha384-w1Q4orYjBQndcko6MimVbzY0tgp4pWB4lZ7lr30WKz0vr/aWKhXdBNmNb5D92v7s"
-            crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.4.0/socket.io.js"></script>
+    <script
+      src="https://code.jquery.com/jquery-3.5.1.js"
+      integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc="
+      crossorigin="anonymous"
+    ></script>
 
-    <link href="/static/mystyle.css" rel="stylesheet">
     <title>CRUD 주특기 사전과제</title>
     <script>
-        function modify_post() {
-            const user = $('#user').val()
-            const title = $('#title').val()
+      const search = location.search;
+      const params = new URLSearchParams(search);
+      const id = params.get("id"); //post 의 아이디
+      const user_login = localStorage.getItem("user_login");
 
-            const password = $('#password').val() // TODO crypto를 이용해 암호화 필요
-            const content = $('#content').val()
-            const _id = location.pathname.split('/')[2]
-
-            $.ajax({
-                type: "PUT",
-                url: `/api/posts/${_id}`,
-                data: {user, title, password, content},
-                success: (response) => {
-                    alert(response.result);
-                    location.href = `/`
-                },
-                error: function (error) {
-                    console.log(error.status);
-                    if (error.status == 406) {
-                        alert('패스워드가 일치하지 않습니다.')
-                    } else if (error.status == 400) {
-                        alert('API 호출에 실패하였습니다.')
-                    }
-                },
-            })
+      $(document).ready(function () {
+        if (!localStorage.getItem("token")) {
+          alert("로그인이 필요합니다.");
+          location.href = "/login";
         }
+        get_post();
+        get_comments();
+      });
 
-        function delete_post() {
-            const password = $('#password').val()
-            let pathName = location.pathname.split("/")[2]
-            $.ajax({
-                type: "DELETE",
-                url: `/api/posts/${pathName}`,
-                data: {password},
-                success: (response) => {
-                    alert(response.result);
-                    location.href = `/`
-                },
-                error: function (error) {
-                    console.log(error.status);
-                    if (error.status == 406) {
-                        alert('패스워드가 일치하지 않습니다.')
-                    } else if (error.status == 400) {
-                        alert('API 호출에 실패하였습니다.')
-                    }
-                },
-            })
+      //게시글 정보 가져오기
+      function get_post() {
+        $.ajax({
+          type: "GET",
+          beforeSend: function (xhr) {
+            xhr.setRequestHeader(
+              "Authorization",
+              localStorage.getItem("token")
+            );
+          },
+          url: `/posts/${id}`,
+          data: {},
+          success: function (post) {
+            const username = post.username;
+            const title = post.title;
+            const content = post.content;
+            console.log(username, title, content);
+            make_post(username, title, content);
+          },
+        });
+      }
+
+      //댓글 정보 가져오기
+      function get_comments() {
+        $.ajax({
+          type: "GET",
+          beforeSend: function (xhr) {
+            xhr.setRequestHeader(
+              "Authorization",
+              localStorage.getItem("token")
+            );
+          },
+          url: `/comments/${id}`,
+          data: {},
+          success: function (comments) {
+            for (let i = 0; i < comments.length; i++) {
+              const comment_id = comments[i].id;
+              const username = comments[i].username;
+              const text = comments[i].text;
+              const createdAt = comments[i].createdAt;
+              make_comments(i, username, text, createdAt, comment_id);
+              console.log(username, text);
+            }
+          },
+        });
+      }
+
+      // 가져온 댓글들을 Table Rows로 삽입.
+      function make_comments(num, username, text, createdAt, comment_id) {
+        if (user_login === username) {
+          let temp_html = `
+            <tr id="word-${num}">
+                <td>${username}</td>
+                <td>${text}</td>
+                <td>${createdAt}</td>
+                <td><button id=${comment_id}">삭제</button></td>
+            </tr>`;
+          $("#tbody-box").append(temp_html);
+          document.getElementById('comment_id').onclick = delete_comment(comment_id);
+        } else {
+          let temp_html = `
+            <tr id="word-${num}">
+                <td>${username}</td>
+                <td>${text}</td>
+                <td>${createdAt}</td>
+            </tr>`;
+          $("#tbody-box").append(temp_html);
         }
+        
+      }
 
+      //게시글 삽입
+      function make_post(username, title, content) {
+        let temp_html = `
+          <h2>${user_login} 님 반갑습니다</h2>
+          <h2>제목</h2>
+          <h4>${title}</h4>
+          <h2>내용</h2>
+          <h4>${content}</h4>`;
+        $("#post-content").append(temp_html);
+      }
+
+      //댓글 작성
+      function insert_comment() {
+        const text = $("#input_comment").val();
+
+        $.ajax({
+          type: "POST",
+          beforeSend: function (xhr) {
+            xhr.setRequestHeader(
+              "Authorization",
+              localStorage.getItem("token")
+            );
+          },
+          url: `/comments/${id}`,
+          data: JSON.stringify({ text }),
+          contentType: "application/json",
+          success: function (response) {
+            console.log(response);
+            location.href = `/detail?id=${id}`;
+          },
+          error: function () {
+            alert("아이디 또는 비밀번호를 확인하세요.");
+          },
+        });
+      }
+
+      //댓글 삭제
+      function delete_comment(comment_id) {
+        alert("삭제버튼클릭");
+        $.ajax({
+          type: "DELETE",
+          beforeSend: function (xhr) {
+            xhr.setRequestHeader(
+              "Authorization",
+              localStorage.getItem("token")
+            );
+          },
+          url: `/comments/${comment_id}`,
+          data: {},
+          success: function (response) {
+            console.log(response);
+            location.href = `/detail?id=${id}`;
+          },
+          error: function () {
+            alert("error");
+          }
+        });
+      }
+  
     </script>
-    <style>
-
-        html {
-            overflow: auto;
-        }
-    </style>
-</head>
-
-<body>
-<nav class="navbar navbar-expand-sm navbar-dark bg-sparta justify-content-end">
-    <a class="navbar-brand" href="/">
-        <img src="/static/logo_big_tr.png" width="30" height="30" class="d-inline-block align-top" alt="">
-        스파르타 게시판
-    </a>
-    <button class="navbar-toggler ml-auto" type="button" data-toggle="collapse"
-            data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="true"
-            aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
-    <div class="navbar-collapse collapse flex-grow-0 ml-auto" id="navbarSupportedContent" style="">
-        <ul class="navbar-nav mr-auto text-right">
-            <li class="nav-item" id="link-cart">
-                <a class="nav-link" onclick="modify_post()">
-                    수정완료
-                </a>
-            </li>
-            <li class="nav-item" id="link-cart">
-                <a class="nav-link" onclick="delete_post()">
-                    삭제
-                </a>
-            </li>
-
-        </ul>
+  </head>
+  <body>
+    <div style="width: 500px; margin: auto">
+      <div id="post-content">
+        <!-- Insert Post-->
+      </div>
+      <div id="postList" class="mb-3">
+        <table class="table">
+          <thead class="thead-light">
+            <tr>
+              <th scope="col">작성자</th>
+              <th scope="col" style="width: 30%">댓글</th>
+              <th scope="col">작성 날짜</th>
+              <th scope="col"></th>
+            </tr>
+          </thead>
+          <tbody id="tbody-box">
+            <!-- Insert Table Rows-->
+          </tbody>
+        </table>
+        <input type="text" id="input_comment" />
+        <button onclick="insert_comment()">댓글 작성</button>
+      </div>
+      <button onclick="location.href = '/'">뒤로가기</button>
     </div>
-
-</nav>
-<div class="wrap">
-
-    <div class="container">
-        <div class="d-flex justify-content-between align-items-end">
-            <div class="input-group mb-3">
-                <div class="input-group-prepend">
-                    <span class="input-group-text" id="basic-addon1">Title</span>
-                </div>
-                <input id="title" type="text" class="form-control" placeholder="" aria-label=""
-                       aria-describedby="basic-addon1" value="<%= post.title %>">
-            </div>
-        </div>
-        <div class="input-group mb-3">
-            <div class="input-group-prepend">
-                <span class="input-group-text" id="basic-addon1">User</span>
-            </div>
-            <input id="user" type="text" class="form-control" placeholder="" aria-label=""
-                   aria-describedby="basic-addon1" value="<%= post.user %>">
-            <div class="input-group-prepend">
-                <span class="input-group-text" id="basic-addon1">Pass</span>
-            </div>
-            <input id="password" type="password" class="form-control" placeholder="" aria-label=""
-                   aria-describedby="basic-addon1">
-        </div>
-        <hr>
-        <div class="form-group">
-            <textarea class="form-control" id="content" rows="3"><%= post.content %></textarea>
-        </div>
-    </div>
-
-
-</div>
-
-
-</body>
-
+  </body>
 </html>

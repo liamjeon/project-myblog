@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+    <link rel="icon" href="/static/favicon.ico" type="image/x-icon" />
+    <link rel="shortcut icon" href="/static/favicon.ico" type="image/x-icon" />
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script
+      src="https://code.jquery.com/jquery-3.5.1.js"
+      integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc="
+      crossorigin="anonymous"
+    ></script>
+    <title>Document</title>
+
+    <script>
+      function login() {
+        const user = {
+          username: $("#username").val(),
+          password: $("#password").val(),
+        };
+
+        $.ajax({
+          type: "POST",
+          url: `/auth/login`,
+          data: JSON.stringify(user),
+          contentType: "application/json",
+          success: function (response) {
+            console.log(response.token, response.username);
+            localStorage.setItem("token", `Bearer ${response.token}`);
+            localStorage.setItem("user_login", $("#username").val());
+            location.href = "/";
+          },
+          error: function () {
+            alert("아이디 또는 비밀번호를 확인하세요.");
+          },
+        });
+      }
+    </script>
+  </head>
+  <body>
+    <div style="width:500px; margin:auto;">
+      <p>Nickname : <input type="text" id="username" /></p>
+      <p>Password : <input type="password" id="password" /></p>
+      <button id="btn-login" onclick="login()">로그인</button>
+      <button id="btn-signup" onclick="location.href = `/signup`">회원가입</button>
+    </div>
+  </body>
+</html>

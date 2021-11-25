@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+    <link rel="icon" href="/static/favicon.ico" type="image/x-icon" />
+    <link rel="shortcut icon" href="/static/favicon.ico" type="image/x-icon" />
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script
+      src="https://code.jquery.com/jquery-3.5.1.js"
+      integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc="
+      crossorigin="anonymous"
+    ></script>
+    <title>Document</title>
+
+    <script>
+      function createPost() {
+        const post = {
+          title: $("#title").val(),
+          content: $("#content").val(),
+        };
+
+        $.ajax({
+          type: "POST",
+          beforeSend: function (xhr) {
+            xhr.setRequestHeader(
+              "Authorization",
+              localStorage.getItem("token")
+            );
+          },
+          url: `/posts`,
+          data: JSON.stringify(post),
+          contentType: "application/json",
+          success: function (response) {
+            alert('글 작성 완료!')
+            location.href = "/";
+          },
+        });
+      }
+    </script>
+  </head>
+  <body>
+    <div style="width:500px; margin:auto;">
+      <p>제목 : <input type="text" id="title" /></p>
+      <p>내용 : <input type="text" id="content" /></p>
+      <button id="btn-login" onclick="createPost()">작성하기</button>
+      <button id="btn-signup" onclick="location.href = `/`">취소</button>
+    </div>
+  </body>
+</html>
