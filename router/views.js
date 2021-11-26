@@ -5,12 +5,9 @@ import { isAuth } from "../middleware/auth.js";
 const router = express.Router();
 
 // 메인페이지 게시글 전체 조회
-router.get("/", (request, res) => {
-  res.render("index");
-});
-
+router.get("/", (req, res) => res.render("login"));
 // 상세페이지
-router.get("/detail", (request, res) =>  res.render("detail"));
+router.get("/detail", (req, res) => res.render("detail"));
 //로그인페이지
 router.get("/login", (req, res) => res.render("login"));
 //회원가입

@@ -20,7 +20,7 @@ export async function getById(id){
 }
 
 export async function getByPostId(postId) {
-  return Comment.find({ postId }).sort({ createdAt: -1 });
+  return Comment.find({ postId }).sort({ createdAt: 1 });
 }
 
 export async function create(postId, userId, text) {

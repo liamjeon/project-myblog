@@ -32,6 +32,6 @@ app.use((error, req, res, next) => {
 connectDB() //mongoose.connection()의 promise 반환.
   .then(() => {
     console.log("init");
-    const server = app.listen(8080); //8080포트에 연결
+    const server = app.listen(3000); //3000포트에 연결
   })
   .catch(console.error);

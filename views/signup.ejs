@@ -16,14 +16,18 @@
       integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc="
       crossorigin="anonymous"
     ></script>
-    <title>Document</title>
+    <title>Myblog</title>
 
     <script>
       function signup() {
         const user = {
           username: $("#username").val(),
           password: $("#password").val(),
+          password_check: $("#password_check").val(),
         };
+        if(user.password !== user.password_check){
+          return alert("비밀번호가 일치하지 않습니다.");
+        }
 
         $.ajax({
           type: "POST",
@@ -31,14 +35,11 @@
           data: JSON.stringify(user),
           contentType: "application/json",
           success: function (response) {
-            // console.log(response.token, response.username);
-            // localStorage.setItem("token", `Bearer ${response.token}`);
-            // location.href = "/";
             alert("회원가입 완료");
             location.href = "/login";
           },
-          error: function () {
-            alert("아이디 또는 비밀번호를 확인하세요.");
+          error: function (response) {
+            alert(response.responseJSON['message']['msg']);
           },
         });
       }

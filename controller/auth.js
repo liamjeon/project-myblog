@@ -10,7 +10,6 @@ const bcryptSaltRounds = 10;
 export async function signup(req, res) {
   const { username, password } = req.body;
   const found = await userRepository.findByUsername(username);
-  console.log(username, password);
 
   if (found) {
     //아이디가 이미 DB에 있을때 409

@@ -17,7 +17,7 @@
       crossorigin="anonymous"
     ></script>
 
-    <title>CRUD 주특기 사전과제</title>
+    <title>Myblog</title>
     <script>
       const search = location.search;
       const params = new URLSearchParams(search);
@@ -113,13 +113,13 @@
       function make_comments(num, username, text, createdAt, comment_id) {
         if (user_login === username) {
           let temp_html = `
-            <tr id="d-${comment_id}" style="display: block; text-align:center" >
-                <td width="100">${username}</td>
+            <tr id="d-${comment_id}" style="display: block; text-align:left" >
+                <td width="50">${username}</td>
                 <td width="250" >${text}</td>
-                <td><button onclick="commment_toggle('${comment_id}')">수정</button><button id=${comment_id}">삭제</button></td>
+                <td><button onclick="commment_toggle('${comment_id}')">수정</button><button onclick="delete_comment('${comment_id}')">삭제</button></td>
             </tr>
             <tr id="m-${comment_id}" style="display: none">
-              <td width="100" text-align:center>${username}</td>
+              <td width="50" text-align:left>${username}</td>
               <td width="250"><input id="mc-${comment_id}" type="text" value="${text}"></td>
               <td><button onclick="modify_comment('${comment_id}')">완료</button></td>
             </tr>
@@ -128,8 +128,8 @@
           // document.getElementById('comment_id').onclick = delete_comment(comment_id);
         } else {
           let temp_html = `
-            <tr style="display: block; text-align:center" >
-                <td width="100">${username}</td>
+            <tr style="display: block; text-align:left" >
+                <td width="50">${username}</td>
                 <td width="250">${text}</td>
                 <input type="text" value="${text}">
             </tr>`;
@@ -164,25 +164,27 @@
 
       //댓글 삭제
       function delete_comment(comment_id) {
-        alert("삭제버튼클릭");
-        $.ajax({
-          type: "DELETE",
-          beforeSend: function (xhr) {
-            xhr.setRequestHeader(
-              "Authorization",
-              localStorage.getItem("token")
-            );
-          },
-          url: `/comments/${comment_id}`,
-          data: {},
-          success: function (response) {
-            console.log(response);
-            location.href = `/detail?id=${id}`;
-          },
-          error: function () {
-            alert("error");
-          },
-        });
+        if (confirm("댓글을 삭제 할건가요?") == true) {
+          $.ajax({
+            type: "DELETE",
+            beforeSend: function (xhr) {
+              xhr.setRequestHeader(
+                "Authorization",
+                localStorage.getItem("token")
+              );
+            },
+            url: `/comments/${comment_id}`,
+            data: {},
+            success: function (response) {
+              alert("댓글 삭제 완료");
+              console.log(response);
+              location.href = `/detail?id=${id}`;
+            },
+            error: function () {
+              alert("error");
+            },
+          });
+        }
       }
 
       //댓글 수정
@@ -201,11 +203,11 @@
           data: JSON.stringify({ text }),
           contentType: "application/json",
           success: function (response) {
-            console.log(response);
+            console.log("댓글 수정 완료");
             window.location.reload();
           },
           error: function () {
-            alert("error");
+            // alert("error");
           },
         });
       }
@@ -224,32 +226,32 @@
   </head>
   <body>
     <div style="width: 500px; margin: auto">
-      <button id="btn-modify" onclick="modify_post()" style="display: none">
-        수정하기
-      </button>
-      <span>
-        <!-- <input type="text" value=""> -->
-        <button onclick="history.back();">뒤로가기</button>
-      </span>
+      <div>
+        <button id="btn-modify" onclick="modify_post()" style="display: none">
+          수정하기
+        </button>
+        <button style="display: inline-block" onclick="history.back();">
+          뒤로가기
+        </button>
+      </div>
       <div id="post-content" style="text-align: center; margin-bottom: 50px">
         <!-- Insert Post-->
       </div>
       <div id="postList" class="mb-3" style="width: 100%">
-        <table class="table">
+        <table class="table" style="margin-left: 50px">
           <thead class="thead-light">
-            <tr style="display: block">
-              <th scope="col" width="100">작성자</th>
-              <th scope="col" width="250">댓글</th>
-              <!-- <th scope="col">작성 날짜</th> -->
-              <th scope="col"></th>
-            </tr>
+            <tr style="display: block; margin-left: 50px"></tr>
           </thead>
           <tbody id="tbody-box">
             <!-- Insert Table Rows-->
           </tbody>
         </table>
         <div style="display: block; margin: auto">
-          <input type="text" id="input_comment" style="margin: auto; width:40%;"/>
+          <input
+            type="text"
+            id="input_comment"
+            style="margin-left: 100px; margin-top: 40px; width: 40%"
+          />
           <button onclick="insert_comment()">댓글 작성</button>
         </div>
       </div>

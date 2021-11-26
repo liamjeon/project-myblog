@@ -17,7 +17,7 @@
       crossorigin="anonymous"
     ></script>
 
-    <title>CRUD 주특기 사전과제</title>
+    <title>Myblog</title>
     <script>
       // Html 파일이 전부 로딩되었을 경우 실행
       $(document).ready(function () {
@@ -94,16 +94,15 @@
   </head>
 
   <body>
-    <body style="width:500px; margin:auto;">
-      <button onClick="location.href='./write'">게시글 작성</button>
-      <button onClick="logout()">로그아웃</button>
-      <div id="postList" class="mb-3">
-        <table class="table">
+    <body style="width:800px; margin:auto;">
+      <div id="postList" class="mb-3" style="margin:auto; margin-top: 50px;">
+        <h1 style="text-align: center;">리암 블로그</h1>
+        <table class="table" style="display: block;">
           <thead class="thead-light">
             <tr ">
               <th scope="col">#</th>
               <th scope="col" style="width: 30%">작성자</th>
-              <th scope="col">게시글</th>
+              <th scope="col" width="250">게시글</th>
               <th scope="col">작성날짜</th>
             </tr>
           </thead>
@@ -111,6 +110,10 @@
             <!-- Insert Table Rows-->
           </tbody>
         </table>
+      </div>
+      <div style="margin-left:30%; margin-top:30px;">
+        <button onClick="location.href='./write'">게시글 작성</button>
+        <button onClick="logout()">로그아웃</button>
       </div>
     </div>
   </body>
